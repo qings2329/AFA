@@ -1,6 +1,11 @@
 # coding=utf-8
 import time
+import traceback
 
+try:
+    1/0
+except Exception,e:
+    print traceback.format_exc()
 
 print int(round(5.58357300758))
 

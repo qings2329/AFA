@@ -2,6 +2,7 @@
 
 import json
 import time
+import traceback
 import os
 import commands
 # local path
@@ -39,7 +40,7 @@ path = "/home/qings2329/airfareAnalyze/"
 all_result = {}
 flight_no_query_date_chart = {}
 query_date_list = ["20151027", "20151028", "20151029", "20151030", "20151031", "20151101", "20151102", "20151103", "20151104", "20151105", "20151106", "20151107", "20151108", "20151109", "20151110", "20151111", "20151112", "20151113", "20151114", "20151115", "20151116", "20151117"]
-# query_date_list = ["20151118"]
+query_date_list = ["20151118"]
 # query_date_list = ["20151116"]
 qdl_index = 0
 total_available_flights = 0
@@ -53,28 +54,32 @@ for query_date in query_date_list:
 
     lines = ret.split("\n")
     for ln in lines:
-            separator = ln.find("@@")
-            if separator > -1:
-                separator += 2
-            else:
+            try:
+                separator = ln.find("@@")
+                if separator > -1:
+                    separator += 2
+                else:
+                    continue
+                space_index = ln.find(" {\"extra\":")
+                seqId = ln[:space_index]
+                query_param = json.loads(ln[space_index + 1:separator - 2])
+                uuid = query_param.get("uuid")
+                # if uuid != "3849963113316037":
+                # if uuid != "3849230225793704":
+                #     continue
+
+                p_type = query_param.get("plane_type")
+                if p_type == "RT":
+                    journey_type = 0
+                elif p_type == "OW":
+                    journey_type = 1
+                elif p_type == "ML":
+                    journey_type = 2
+
+                avs = json.loads(ln[separator:])
+            except Exception, ex:
+                traceback.format_exc()
                 continue
-            space_index = ln.find(" {\"extra\":")
-            seqId = ln[:space_index]
-            query_param = json.loads(ln[space_index + 1:separator - 2])
-            uuid = query_param.get("uuid")
-            # if uuid != "3849963113316037":
-            # if uuid != "3849230225793704":
-            #     continue
-
-            p_type = query_param.get("plane_type")
-            if p_type == "RT":
-                journey_type = 0
-            elif p_type == "OW":
-                journey_type = 1
-            elif p_type == "ML":
-                journey_type = 2
-
-            avs = json.loads(ln[separator:])
             fareList = avs["fareList"]
             # print fareList[0]["route"].items()
             total_available_flights += avs["count"]
