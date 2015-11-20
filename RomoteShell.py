@@ -18,7 +18,6 @@ for i in range(8, 9):
         shell = 'ssh usere@bjop.sjbly.cn "zgrep -aE \\"\\\\\\"from_city_code\\\\\\":\\\\\\"BJS\\\\\\",\\\\\\"to_city_code\\\\\\":\\\\\\"PAR\\\\\\",(.*?)\\\\\\"from_city_code\\\\\\":\\\\\\"PAR\\\\\\",\\\\\\"to_city_code\\\\\\":\\\\\\"BJS\\\\\\"\\" ' \
                 + path + "flight_connect." + query_date + ".tgz\""
 
-
         print shell
         print 'Running...'
         executeRet = (status, ret) = commands.getstatusoutput(shell)

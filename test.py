@@ -2,10 +2,23 @@
 import time
 import traceback
 
+path = "/home/qings2329/airfareAnalyze/"
+# 默认文件操作模式是read，不能写文件
+test_file = open(path + "test")
+test_file.write("23434")
+test_file.close()
+
+print "done, total available flights : %d" % 124, " . Time cost : %.2f" % 1.235
+exit()
+
 try:
     1/0
-except Exception,e:
+except Exception, e:
+    print "###################"
     print traceback.format_exc()
+    print "###################"
+    print e
+    print "###################"
 
 print int(round(5.58357300758))
 

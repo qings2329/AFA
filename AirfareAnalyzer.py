@@ -3,9 +3,11 @@
 import json
 import time
 import traceback
+import cPickle
 import os
 import commands
 # local path
+start_time_stamp = time.time()
 path = "/home/qings2329/airfareAnalyze/"
 # remote path
 # path = "/data/nfs/horse3/logs/api-web/"
@@ -37,15 +39,20 @@ path = "/home/qings2329/airfareAnalyze/"
 
 # 这种做法一开始的返回值ret是查询结果，后来就变成状态码，什么原因
 # ret = os.system(shell)
-all_result = {}
-flight_no_query_date_chart = {}
+# all_result = {}
+try:
+    dict_file = open(path + "dict_file.pkl")
+    flight_no_query_date_chart = cPickle.load(dict_file)
+except Exception, e:
+    traceback.format_exc()
+    flight_no_query_date_chart = {}
 query_date_list = ["20151027", "20151028", "20151029", "20151030", "20151031", "20151101", "20151102", "20151103", "20151104", "20151105", "20151106", "20151107", "20151108", "20151109", "20151110", "20151111", "20151112", "20151113", "20151114", "20151115", "20151116", "20151117"]
-query_date_list = ["20151118"]
-# query_date_list = ["20151116"]
+# query_date_list = ["20151118"]
+query_date_list = ["20151030"]
 qdl_index = 0
 total_available_flights = 0
 # query_date = "2015-10-30"
-start_time_stamp = time.time()
+
 for query_date in query_date_list:
     print 'Analyzing...'
     ret = open(path + query_date + "-all-bjs-par-ML", "r").read()
@@ -117,18 +124,16 @@ for query_date in query_date_list:
                     fare["flight_no"] = fare["flight_no"] + "-" + item["return"]["no_link"]
 
                 # 如果航班号对应的信息为空，则添加
-                query_date_dict = all_result.get(fare["flight_no"])
-                if not query_date_dict:
-                    query_date_dict = {}
-                    all_result[fare["flight_no"]] = query_date_dict
-
-                dep_date_list = query_date_dict.get(query_date)
-                if not dep_date_list:
-                    dep_date_list = []
-                    query_date_dict[query_date] = dep_date_list
-
-                # dep_date_dict[fare["dep_date"]] = fare["total_adt"]
-                dep_date_list.append(fare["dep_date"] + "/" + fare["ret_date"] + ":" + str(fare["total_adt"]) + ":" + seqId + "-" + uuid)
+                # query_date_dict = all_result.get(fare["flight_no"])
+                # if not query_date_dict:
+                #     query_date_dict = {}
+                #     all_result[fare["flight_no"]] = query_date_dict
+                #
+                # dep_date_list = query_date_dict.get(query_date)
+                # if not dep_date_list:
+                #     dep_date_list = []
+                #     query_date_dict[query_date] = dep_date_list
+                # dep_date_list.append(fare["dep_date"] + "/" + fare["ret_date"] + ":" + str(fare["total_adt"]) + ":" + seqId + "-" + uuid)
                 # print fare
 
                 flight_no_and_date = fare["flight_no"] + "@" + fare["dep_date"] + "/" + fare["ret_date"]
@@ -155,28 +160,31 @@ for query_date in query_date_list:
 # 可以定义成一个函数
 
 # save file
-file_name = "-AnalyseResutl"
-file_dir = path + file_name
+# file_name = "-AnalyseResutl"
+# file_dir = path + file_name
 # file_handle = open(file_dir, 'w')
 # file_handle.write(analyseResult)
 # file_handle.close()
 
-chart_file = open(path + "chart_file_" + str(time.time()), "w+")
+# 序列化运行结果
+cPickle.dump(flight_no_query_date_chart, dict_file)
 
+# 对key排序
+fnd_list = flight_no_query_date_chart.keys()
+fnd_list.sort()
+
+chart_file = open(path + "chart_file_" + str(time.time()), "w")
 print >> chart_file, "%-60s" % " ",
 for d in query_date_list:
     print >> chart_file, "%-10s" % d,
 print >> chart_file, "\n"
-# print query_date_list
 
-fnd_list = flight_no_query_date_chart.keys()
-fnd_list.sort()
 for fnd in fnd_list:
     print >> chart_file, "%-60s" % fnd,
     for price in flight_no_query_date_chart.get(fnd):
         print >> chart_file, "%-10s" % price,
     print >> chart_file
 chart_file.close()
-print "\n done, total available flights: " + str(total_available_flights) \
-      + ". Time cost :" + str(round(time.time() - start_time_stamp))
+print "\n done, total available flights: %d" % total_available_flights \
+      + ". Time cost : %.2f" % (time.time() - start_time_stamp)
 
