@@ -41,7 +41,7 @@ path = "/home/qings2329/airfareAnalyze/"
 # ret = os.system(shell)
 # all_result = {}
 try:
-    dict_file = open(path + "dict_file.pkl")
+    dict_file = open(path + "dict_file.pkl", "r+")
     flight_no_query_date_chart = cPickle.load(dict_file)
 except Exception, e:
     traceback.format_exc()
