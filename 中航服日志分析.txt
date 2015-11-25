@@ -1,0 +1,253 @@
+# 中控机
+
+ssh usere@bjop.sjbly.cn
+
+
+# 正式环境日志目录
+cd /data/nfs/horse3/logs/api-web/
+
+# 缓存文件目录 /data/nfs/horse3/flight/cache/
+
+#Beta环境
+cd /data/nfs/sky2/logs/api-web/
+
+
+
+统计所有异常数量
+
+grep -Ec "ZHONGHANGFU(.*?)error"  stdout_fighter.log
+
+//查欧美嘉
+grep -Ec "OMEGA(.*?)error"  stdout_fighter.log
+
+1. 访问频率超过对方限制
+
+    grep -Ec "306to|tps"  stdout_fighter.log
+
+2. 未知第三方响应错误
+	1)
+		<Error>BUSINESS EXCEPTION SHOP-RQ-015 no access for BJS191-1EP, please contact shopping admin @./BusinessLogic/ShopperConfigService/ShopperConfigService.cpp::getShopperConfig</Error>
+
+		grep "SHOP-RQ-015 no access for BJS191-1EP"  stdout_fighter.log
+
+	2)
+		grep -nA5 "303inner service error"  stdout_fighter.log | more
+
+		-303inner service error:1000Time out Error
+
+		grep -c "303inner service error:1000Time out Error"  stdout_fighter.log
+
+		
+
+
+		-303inner service error:10000System Error, Ask Travelsky for Help!
+
+
+
+	3)
+		grep -c "java.io.IOException: response not 200, statusCode=503"  stdout_fighter.log
+
+		java.io.IOException: response not 200, statusCode=503
+
+		java.io.IOException: response not 200, statusCode=500
+
+
+	4)	
+		grep -c "SYS-TUX TUXEDO ERROR:tpacall MTIADAPTER error"  stdout_fighter.log
+		
+
+##############################################################################################
+
+查询某天所有异常日志
+
+grep -nEA5 "ZHONGHANGFU(.*?)error" stdout_fighter.log.20150902 | more
+
+查询当天所用异常日志
+
+grep -nEA5 "ZHONGHANGFU(.*?)error" stdout_fighter.log | more
+
+根据seqId查询异常信息
+grep -nEA50 "56675929242266767(.*?)error" stdout_fighter.log | more
+
+
+
+查询某次请求报文
+
+zgrep -aE "54632915488252239(.*?)entity=" flight_request.20150904.tgz
+
+
+	
+grep -E "54632915488252239(.*?)entity=" flight_request
+
+
+
+查询某次响应报文
+
+zgrep -aEA50 "54632915488252239(.*?)response=" flight_request.20150904.tgz | more
+
+
+
+grep -EA100000 "56319160735028028(.*?)response=" flight_request | more
+
+##############################################################################################
+统计查询次数
+grep -c "ZHONGHANGFU" flight_log
+
+
+&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+
+统计经常拋异常的航线机票查询
+
+grep "ZHONGHANGFU" flight_log | grep -v "|200|" -c
+
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+由uuid：3710457111429024和查询条件 dep_date=2016-02-05，搜索2015-10-30的原请求报文、原响应报文、接口返回结果、异常信息
+
+1.查出seqId
+	grep -E "dep_date=2016-02-05(.*?)3710457111429024" stdout_fighter.log.20151030    //查出seqId   59427049437502291
+
+2.根据seqId查原请求报文
+	zgrep -aE "59427049437502291(.*?)entity=" flight_request.20151030.tgz
+
+3.根据seqId查原响应报文
+	zgrep -aE "59427049437502291(.*?)response=" flight_request.20151030.tgz
+ 
+4.根据seqId查接口返回结果
+	zgrep -a 59427049437502291 flight_connect.20151030.tgz
+ 
+5.根据seqId查异常信息
+	grep -EA50 "59427049437502291(.*?)error" stdout_fighter.log.20151030 | more
+
+
+
+
+  cache 文件 
+stdout_flight
+
+
+
+60451082600785608
+
+
+uuid 是查询package id， package 是什么？
+
+
+########################################################
+########################################################
+
+
+
+//航线价格搜索分析
+
+query condition
+
+'"from_city":"北京市","to_city":"巴黎",(.*?)"from_city":"巴黎","to_city":"北京市"'
+
+查询日期 航线 出发日期 价格
+
+
+
+zgrep -aE  '"from_city":"北京市","to_city":"巴黎",(.*?)"from_city":"巴黎","to_city":"北京市"'  flight_connect.20151030.tgz | more
+
+//根据OD城市代码搜索 
+//显示第一行， 命令参数 head -n1
+zgrep -aE '"from_city_code":"BJS","to_city_code":"PAR",(.*?)"from_city_code":"PAR","to_city_code":"BJS"' flight_connect.20151030.tgz | head -n1
+
+
+
+
+//搜索某个uuid所有的查询，截取url
+grep -E "dep_date=(.*?)3710457111429024" stdout_fighter.log.20151028 | awk '{print substr($7, index($7, "provider") + 9)}'
+
+
+
+ssh 参数使用单引号和双引号是有区别的
+
+//远程执行命令
+ssh usere@bjop.sjbly.cn 'echo -e "select count(1) from UTP_COMMON_OBJECTS where CO_DN like 'IPDOM-3';"'
+	select count(1) from UTP_COMMON_OBJECTS where CO_DN like IPDOM-3;
+
+
+ssh usere@bjop.sjbly.cn "echo -e \"select count(1) from UTP_COMMON_OBJECTS where CO_DN like 'IPDOM-3';\""
+	select count(1) from UTP_COMMON_OBJECTS where CO_DN like 'IPDOM-3';
+
+
+ssh usere@bjop.sjbly.cn echo -e 'grep "\" \"" /tmp/1'
+	grep " " /tmp/1
+
+
+ssh usere@bjop.sjbly.cn echo -e "grep -Ec \"dep_date=2016-02-05(.*?)3710457111429024\" /data/nfs/horse3/logs/api-web/stdout_fighter.log.20151030"
+	
+
+	
+ssh usere@bjop.sjbly.cn echo -e 'grep -Ec \""dep_date=2016-02-05(.*?)3710457111429024\"" /data/nfs/horse3/logs/api-web/stdout_fighter.log.20151030'
+	grep -Ec "dep_date=2016-02-05(.*?)3710457111429024" /data/nfs/horse3/logs/api-web/stdout_fighter.log.20151030
+
+
+
+ssh usere@bjop.sjbly.cn echo -e 'zgrep -aEc '"from_city_code"(.*?)' flight_connect.20151030.tgz'
+
+
+ssh usere@bjop.sjbly.cn echo -e "\"" grep -Ec \"'"\"dep_date=2016-02-05(.*?)3710457111429024\""'\" "\""
+	 grep -Ec "dep_date=2016-02-05(.*?)3710457111429024" 
+
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// 搜索查询记录
+grep fighter_search stdout_fighter.log* | head -n2
+
+
+// 抽取
+awk '{split($1, ret, "|"); print substr(ret[7], 11, 6), substr(ret[7], 28, 6), substr(ret[8], index(ret[8], ",") + 1, 2)  }' one-airfare-result
+
+
+// 抽取、统计、排序
+awk '{split($1, ret, "|"); print substr(ret[7], 11, 6) , substr(ret[7], 28, 6) , substr(ret[8], index(ret[8], ",") + 1, 2)  }' all-airfare-search-result | sort | uniq -c | sort -nr
+
+// 总
+grep fighter_search /data/nfs/horse3/logs/api-web/stdout_fighter.log* | head -n100 | awk '{split($11, ret, "|"); print substr(ret[7], 11, 6) , substr(ret[7], 28, 6) , substr(ret[8], index(ret[8], ",") + 1, 2)  }'| sort | uniq -c | sort -nr
+
+#####################################################################################################################################################################
+//2015-11-23 中航服验价异常处理
+
+
+http://is.shijiebang.com/fighter/check-pricing/?cacheKey=zhf_caad0a7256db6830dc0d1c0faee07d4e&provider=zhonghangfu
+
+
+[usere@opcenter api-web]$ grep zhf_caad0a7256db6830dc0d1c0faee07d4e stdout_fighter.log
+11-23 11:29:05:INFO(228)qtp1690254271-15475 FighterController - 1447926486295 fighter_rules http://is.shijiebang.com/fighter/rules/?provider=zhonghangfu&cacheKey=zhf_caad0a7256db6830dc0d1c0faee07d4e => com.shijiebang.flight.adapter.FlightRuleParam@4826a95c
+11-23 11:29:09:INFO(275)qtp1690254271-15475 FighterController - 1447926486296 check_pricing http://is.shijiebang.com/fighter/check-pricing/?provider=zhonghangfu&cacheKey=zhf_caad0a7256db6830dc0d1c0faee07d4e => com.shijiebang.flight.adapter.FlightPriceCheckParam@45433fe2
+11-23 11:32:42:INFO(275)qtp1690254271-15504 FighterController - 1447926486297 check_pricing http://is.shijiebang.com/fighter/check-pricing/?provider=zhonghangfu&cacheKey=zhf_caad0a7256db6830dc0d1c0faee07d4e => com.shijiebang.flight.adapter.FlightPriceCheckParam@28f37f34
+11-23 11:32:51:INFO(275)qtp1690254271-15502 FighterController - 1447926486298 check_pricing http://is.shijiebang.com/fighter/check-pricing/?provider=zhonghangfu&cacheKey=zhf_caad0a7256db6830dc0d1c0faee07d4e => com.shijiebang.flight.adapter.FlightPriceCheckParam@2d503f9a
+
+61513229999301890 {"plane_type":"RT","dep_city":"OOL","dest_city":"MEL","dep_date":"2015-12-30","return_date":"2016-01-08","dep_city2":"","dest_city2":"","dep_date2":"","cabin":0,"adt_num":2,"chd_num":0,"provider":"ZHONGHANGFU","source":"","nocache":true,"seqId":61513229999301890,"airline_code":"","max_stops":-1,"earliest_takeoff":-1,"latest_takeoff":-1,"earliest_takeoff2":-1,"latest_takeoff2":-1,"uuid":"","searchSourceParam":"","isFixedProvider":false,"isMergeQuery":true,"counterKey":"zhonghangfu-2015-11-23","trips":"2015-12-30OOLMEL,2016-01-08MELOOL","key":"ZHONGHANGFU,RT,OOL,MEL,2015-12-30,2,0,a101adb9efaf9b5d2c92387d8e8a479a"}@@{"status":0,"code":0,"msg":null,"costtime":0,"fareList":[{"provider":"zhonghangfu","route":{"014301":{"depdate":"2015-12-30 18:55:00","arrdate":"2015-12-30 22:15:00","depdate_tm":1451472900,"arrdate_tm":1451484900,"outairport":"OOL","outairportNameCn":"黄金海岸机场(OOL)","outcity":"OOL","outcityNameCn":"黄金海岸","inairport":"MEL","inairportNameCn":"墨尔本机场(MEL)","incity":"MEL","incityNameCn":"墨尔本","airline":"VA","airlineNameCn":"委内瑞拉国际航空公司","flightno":"748","planeStyle":"73H","elapsedTime":"1.20","stopovertime":"0","link":"VA748","rph":"014301","depTerm":"1","arrTerm":"3"},"021501":{"depdate":"2016-01-08 11:10:00","arrdate":"2016-01-08 12:15:00","depdate_tm":1452222600,"arrdate_tm":1452226500,"outairport":"MEL","outairportNameCn":"墨尔本机场(MEL)","outcity":"MEL","outcityNameCn":"墨尔本","inairport":"OOL","inairportNameCn":"黄金海岸机场(OOL)","incity":"OOL","incityNameCn":"黄金海岸","airline":"VA","airlineNameCn":"委内瑞拉国际航空公司","flightno":"739","planeStyle":"73H","elapsedTime":"3.05","stopovertime":"0","link":"VA739","rph":"021501","depTerm":"3","arrTerm":"1"}},"key":1,"amount_adt":1066,"tax_adt":154,"amount_chd":0,"tax_chd":0,"ext":{},"ml":{},"fareAirline":"VA","fareAirlineNameCn":"委内瑞拉国际航空公司","cacheKey":"zhf_caad0a7256db6830dc0d1c0faee07d4e","go":{"diff_day":0,"total_time_bs":80,"no_link":"VA748","route_cnt":0,"start_time":1451472900,"end_time":1451484900,"start_airline_no":"VA748","end_airline_no":"VA748","from_airport_no":"OOL","to_airport_no":"MEL","from_city":"黄金海岸","to_city":"墨尔本","from_city_code":"OOL","to_city_code":"MEL","from_airport":"黄金海岸机场(OOL)","to_airport":"墨尔本机场(MEL)","from_fly_style":"73H","total_time":"1小时20分钟","depTerm":"1","arrTerm":"3","flist":["014301"]},"return":{"diff_day":0,"total_time_bs":185,"no_link":"VA739","route_cnt":0,"start_time":1452222600,"end_time":1452226500,"start_airline_no":"VA739","end_airline_no":"VA739","from_airport_no":"MEL","to_airport_no":"OOL","from_city":"墨尔本","to_city":"黄金海岸","from_city_code":"MEL","to_city_code":"OOL","from_airport":"墨尔本机场(MEL)","to_airport":"黄金海岸机场(OOL)","from_fly_style":"73H","total_time":"3小时5分钟","depTerm":"3","arrTerm":"1","flist":["021501"]}},{"provider":"zhonghangfu","route":{"012201":{"depdate":"2015-12-30 12:40:00","arrdate":"2015-12-30 15:55:00","depdate_tm":1451450400,"arrdate_tm":1451462100,"outairport":"OOL","outairportNameCn":"黄金海岸机场(OOL)","outcity":"OOL","outcityNameCn":"黄金海岸","inairport":"MEL","inairportNameCn":"墨尔本机场(MEL)","incity":"MEL","incityNameCn":"墨尔本","airline":"QF","airlineNameCn":"快达航空公司","flightno":"881","planeStyle":"73H","elapsedTime":"1.15","stopovertime":"0","link":"QF881","rph":"012201","depTerm":"1","arrTerm":"1"},"020801":{"depdate":"2016-01-08 09:30:00","arrdate":"2016-01-08 10:35:00","depdate_tm":1452216600,"arrdate_tm":1452220500,"outairport":"MEL","outairportNameCn":"墨尔本机场(MEL)","outcity":"MEL","outcityNameCn":"墨尔本","inairport":"OOL","inairportNameCn":"黄金海岸机场(OOL)","incity":"OOL","incityNameCn":"黄金海岸","airline":"QF","airlineNameCn":"快达航空公司","flightno":"880","planeStyle":"73H","elapsedTime":"3.05","stopovertime":"0","link":"QF880","rph":"020801","depTerm":"1","arrTerm":"1"}},"key":2,"amount_adt":2572,"tax_adt":138,"amount_chd":0,"tax_chd":0,"ext":{},"ml":{},"fareAirline":"QF","fareAirlineNameCn":"快达航空公司","cacheKey":"zhf_d573afaf1658ea1c440ad20b06c1d1b2","go":{"diff_day":0,"total_time_bs":75,"no_link":"QF881","route_cnt":0,"start_time":1451450400,"end_time":1451462100,"start_airline_no":"QF881","end_airline_no":"QF881","from_airport_no":"OOL","to_airport_no":"MEL","from_city":"黄金海岸","to_city":"墨尔本","from_city_code":"OOL","to_city_code":"MEL","from_airport":"黄金海岸机场(OOL)","to_airport":"墨尔本机场(MEL)","from_fly_style":"73H","total_time":"1小时15分钟","depTerm":"1","arrTerm":"1","flist":["012201"]},"return":{"diff_day":0,"total_time_bs":185,"no_link":"QF880","route_cnt":0,"start_time":1452216600,"end_time":1452220500,"start_airline_no":"QF880","end_airline_no":"QF880","from_airport_no":"MEL","to_airport_no":"OOL","from_city":"墨尔本","to_city":"黄金海岸","from_city_code":"MEL","to_city_code":"OOL","from_airport":"墨尔本机场(MEL)","to_airport":"黄金海岸机场(OOL)","from_fly_style":"73H","total_time":"3小时5分钟","depTerm":"1","arrTerm":"1","flist":["020801"]}},{"provider":"zhonghangfu","route":{"015901":{"depdate":"2015-12-30 06:15:00","arrdate":"2015-12-30 08:45:00","depdate_tm":1451427300,"arrdate_tm":1451436300,"outairport":"OOL","outairportNameCn":"黄金海岸机场(OOL)","outcity":"OOL","outcityNameCn":"黄金海岸","inairport":"SYD","inairportNameCn":"悉尼机场国际航站楼(SYD)","incity":"SYD","incityNameCn":"悉尼","airline":"QF","airlineNameCn":"快达航空公司","flightno":"861","planeStyle":"73H","elapsedTime":"0.30","stopovertime":"0","link":"QF861","rph":"015901","depTerm":"1","arrTerm":"3"},"015902":{"depdate":"2015-12-30 10:00:00","arrdate":"2015-12-30 11:35:00","depdate_tm":1451440800,"arrdate_tm":1451446500,"outairport":"SYD","outairportNameCn":"悉尼机场国际航站楼(SYD)","outcity":"SYD","outcityNameCn":"悉尼","inairport":"MEL","inairportNameCn":"墨尔本机场(MEL)","incity":"MEL","incityNameCn":"墨尔本","airline":"QF","airlineNameCn":"快达航空公司","flightno":"423","planeStyle":"73H","elapsedTime":"1.35","stopovertime":"1.15","link":"QF423","rph":"015902","depTerm":"3","arrTerm":"1"},"020801":{"depdate":"2016-01-08 09:30:00","arrdate":"2016-01-08 10:35:00","depdate_tm":1452216600,"arrdate_tm":1452220500,"outairport":"MEL","outairportNameCn":"墨尔本机场(MEL)","outcity":"MEL","outcityNameCn":"墨尔本","inairport":"OOL","inairportNameCn":"黄金海岸机场(OOL)","incity":"OOL","incityNameCn":"黄金海岸","airline":"QF","airlineNameCn":"快达航空公司","flightno":"880","planeStyle":"73H","elapsedTime":"3.05","stopovertime":"0","link":"QF880","rph":"020801","depTerm":"1","arrTerm":"1"}},"key":3,"amount_adt":2624,"tax_adt":174,"amount_chd":0,"tax_chd":0,"ext":{},"ml":{},"fareAirline":"QF","fareAirlineNameCn":"快达航空公司","cacheKey":"zhf_1a68b0dc4041dda607625e34fcfd6503","go":{"diff_day":0,"total_time_bs":125,"no_link":"QF861/QF423","route_cnt":1,"start_time":1451427300,"end_time":1451446500,"start_airline_no":"QF861","end_airline_no":"QF423","from_airport_no":"OOL","to_airport_no":"MEL","from_city":"黄金海岸","to_city":"墨尔本","from_city_code":"OOL","to_city_code":"MEL","from_airport":"黄金海岸机场(OOL)","to_airport":"墨尔本机场(MEL)","from_fly_style":"73H","total_time":"2小时5分钟","depTerm":"1","arrTerm":"1","flist":["015901","015902"]},"return":{"diff_day":0,"total_time_bs":185,"no_link":"QF880","route_cnt":0,"start_time":1452216600,"end_time":1452220500,"start_airline_no":"QF880","end_airline_no":"QF880","from_airport_no":"MEL","to_airport_no":"OOL","from_city":"墨尔本","to_city":"黄金海岸","from_city_code":"MEL","to_city_code":"OOL","from_airport":"墨尔本机场(MEL)","to_airport":"黄金海岸机场(OOL)","from_fly_style":"73H","total_time":"3小时5分钟","depTerm":"1","arrTerm":"1","flist":["020801"]}}],"cachefile":"","provider":"zhonghangfu","queryTime":"2015-11-23 11:28:28","count":3}
+
+
+grep -E "61513229999301890(.*?)entity=" flight_request
+
+grep -EA100000 "61513229999301890(.*?)response=" flight_request | more
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
