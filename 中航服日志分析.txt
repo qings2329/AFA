@@ -60,11 +60,11 @@ grep -Ec "OMEGA(.*?)error"  stdout_fighter.log
 
 查询某天所有异常日志
 
-grep -nEA5 "ZHONGHANGFU(.*?)error" stdout_fighter.log.20150902 | more
+grep -nEA50 "ZHONGHANGFU(.*?)error" stdout_fighter.log.20150902 | more
 
 查询当天所用异常日志
 
-grep -nEA5 "ZHONGHANGFU(.*?)error" stdout_fighter.log | more
+grep -nEA50 "ZHONGHANGFU(.*?)error" stdout_fighter.log | more
 
 根据seqId查询异常信息
 grep -nEA50 "56675929242266767(.*?)error" stdout_fighter.log | more
@@ -76,14 +76,13 @@ grep -nEA50 "56675929242266767(.*?)error" stdout_fighter.log | more
 zgrep -aE "54632915488252239(.*?)entity=" flight_request.20150904.tgz
 
 
-	
 grep -E "54632915488252239(.*?)entity=" flight_request
 
 
 
 查询某次响应报文
 
-zgrep -aEA50 "54632915488252239(.*?)response=" flight_request.20150904.tgz | more
+zgrep -aE "61521783469463946(.*?)response=" flight_request.20151123.tgz
 
 
 
@@ -196,8 +195,7 @@ ssh usere@bjop.sjbly.cn echo -e "\"" grep -Ec \"'"\"dep_date=2016-02-05(.*?)3710
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // 搜索查询记录
-grep fighter_search stdout_fighter.log* | head -n2
-
+grep "fighter_search http" stdout_fighter.log* | head -n2
 
 // 抽取
 awk '{split($1, ret, "|"); print substr(ret[7], 11, 6), substr(ret[7], 28, 6), substr(ret[8], index(ret[8], ",") + 1, 2)  }' one-airfare-result
@@ -206,8 +204,38 @@ awk '{split($1, ret, "|"); print substr(ret[7], 11, 6), substr(ret[7], 28, 6), s
 // 抽取、统计、排序
 awk '{split($1, ret, "|"); print substr(ret[7], 11, 6) , substr(ret[7], 28, 6) , substr(ret[8], index(ret[8], ",") + 1, 2)  }' all-airfare-search-result | sort | uniq -c | sort -nr
 
-// 总
-grep fighter_search /data/nfs/horse3/logs/api-web/stdout_fighter.log* | head -n100 | awk '{split($11, ret, "|"); print substr(ret[7], 11, 6) , substr(ret[7], 28, 6) , substr(ret[8], index(ret[8], ",") + 1, 2)  }'| sort | uniq -c | sort -nr
+// 最后的操作
+grep "fighter_search http" /data/nfs/horse3/logs/api-web/stdout_fighter.log* | head -n100 | awk '{split($11, ret, "|"); print substr(ret[7], 11, 6) , substr(ret[7], 28, 6) , substr(ret[8], index(ret[8], ",") + 1, 2)  }'| sort | uniq -c | sort -nr
+
+
+grep "fighter_search http" /data/nfs/horse3/logs/api-web/stdout_fighter.log.20151105 | head -n100 | awk '{split($11, ret, "|"); print substr(ret[7], 11, 6) , substr(ret[7], 28, 6) , substr(ret[8], index(ret[8], ",") + 1, 2), $11 }'
+
+
+
+
+
+
+
+// 调试
+awk '{split($3, ret, "|"); print substr(ret[6], 11, 6) , substr(ret[6], 28, 6) , substr(ret[8], index(ret[7], ",") + 1, 2)  }' 05112015-search-params
+
+awk -v target=6 '{split($3, ret, "|"); if(length(ret) > 7) target = 7; print substr(ret[target], 11, 6) , substr(ret[target], 28, 6) , substr(ret[target + 1], index(ret[target + 1], ",") + 1, 2)  }' 05112015-search-params
+
+
+
+
+
+grep "fighter_search http" /data/nfs/horse3/logs/api-web/stdout_fighter.log* | head -n100 |awk -v target=6 '{split($11, ret, "|"); if(length(ret) > 7) target = 7; print substr(ret[target], 11, 6) , substr(ret[target], 28, 6) , substr(ret[target + 1], index(ret[target + 1], ",") + 1, 2) }' | sort | uniq -c | sort -nr
+
+
+
+
+
+
+grep "fighter_search http" stdout_fighter.log.20151108 |awk -v target=6 '{split($11, ret, "|"); if(length(ret) > 7) target = 7; print substr(ret[target], 11, 6) , substr(ret[target], 28, 6) , substr(ret[target + 1], index(ret[target + 1], ",") + 1, 2) }' | sort | uniq -c | sort -nr
+
+
+
 
 #####################################################################################################################################################################
 //2015-11-23 中航服验价异常处理
@@ -228,6 +256,9 @@ http://is.shijiebang.com/fighter/check-pricing/?cacheKey=zhf_caad0a7256db6830dc0
 grep -E "61513229999301890(.*?)entity=" flight_request
 
 grep -EA100000 "61513229999301890(.*?)response=" flight_request | more
+
+
+
 
 
 
