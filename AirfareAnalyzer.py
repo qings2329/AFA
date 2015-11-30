@@ -8,7 +8,13 @@ import os
 import commands
 # local path
 start_time_stamp = time.time()
-path = "/home/qings2329/airfareAnalyze/"
+path = "/home/qings2329/airfareAnalyze/search/BJSSYDMELBJSML/"
+path = "/home/qings2329/airfareAnalyze/search/BJSHNLHNLBJSRT/"
+path = "/home/qings2329/airfareAnalyze/search/BJSAKLAKLBJSRT/"
+
+path = "/home/qings2329/airfareAnalyze/search/BJSPARROMBJSRT/"
+path = "/home/qings2329/airfareAnalyze/search/BJSROMMILBJSML/"
+
 # remote path
 # path = "/data/nfs/horse3/logs/api-web/"
 
@@ -40,22 +46,30 @@ path = "/home/qings2329/airfareAnalyze/"
 # 这种做法一开始的返回值ret是查询结果，后来就变成状态码，什么原因
 # ret = os.system(shell)
 # all_result = {}
-try:
-    dict_file = open(path + "dict_file.pkl", "r+")
-    flight_no_query_date_chart = cPickle.load(dict_file)
-except Exception, e:
-    traceback.format_exc()
-    flight_no_query_date_chart = {}
+
+flight_no_query_date_chart = {}
+
+# try:
+#     dict_file = open(path + "dict_file.pkl", "r+")
+#     flight_no_query_date_chart = cPickle.load(dict_file)
+# except Exception, e:
+#     traceback.format_exc()
+
 query_date_list = ["20151027", "20151028", "20151029", "20151030", "20151031", "20151101", "20151102", "20151103", "20151104", "20151105", "20151106", "20151107", "20151108", "20151109", "20151110", "20151111", "20151112", "20151113", "20151114", "20151115", "20151116", "20151117"]
+
+query_date_list = ["20151106", "20151107", "20151108", "20151109", "20151110", "20151111", "20151112", "20151113", "20151114", "20151115", "20151116", "20151117", "20151118", "20151119", "20151120", "20151121", "20151122", "20151123", "20151124", "20151125", "20151126"]
+# query_date_list = ["20151105", "20151106", "20151107", "20151108", "20151109", "20151110", "20151111", "20151112", "20151113", "20151114", "20151115", "20151116"]
+
 # query_date_list = ["20151118"]
-query_date_list = ["20151030"]
+# query_date_list = ["20151120", "20151121", "20151122", "20151123", "20151124", "20151125", "20151126"]
 qdl_index = 0
 total_available_flights = 0
 # query_date = "2015-10-30"
-
+# file_type = "-all-bjs-par-ML"
+file_type = "-search"
 for query_date in query_date_list:
     print 'Analyzing...'
-    ret = open(path + query_date + "-all-bjs-par-ML", "r").read()
+    ret = open(path + query_date + file_type, "r").read()
     # ret = ""
     # print ret
 
@@ -67,7 +81,7 @@ for query_date in query_date_list:
                     separator += 2
                 else:
                     continue
-                space_index = ln.find(" {\"extra\":")
+                space_index = ln.find(" {")
                 seqId = ln[:space_index]
                 query_param = json.loads(ln[space_index + 1:separator - 2])
                 uuid = query_param.get("uuid")
@@ -120,7 +134,7 @@ for query_date in query_date_list:
                 else:
                     fare["flight_no"] = item["go"]["no_link"]
 
-                if any(item["return"]):
+                if item.get("return") and any(item.get("return")):
                     fare["flight_no"] = fare["flight_no"] + "-" + item["return"]["no_link"]
 
                 # 如果航班号对应的信息为空，则添加
@@ -167,7 +181,7 @@ for query_date in query_date_list:
 # file_handle.close()
 
 # 序列化运行结果
-cPickle.dump(flight_no_query_date_chart, dict_file)
+# cPickle.dump(flight_no_query_date_chart, dict_file)
 
 # 对key排序
 fnd_list = flight_no_query_date_chart.keys()

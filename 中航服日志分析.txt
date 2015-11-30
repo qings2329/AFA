@@ -228,13 +228,7 @@ awk -v target=6 '{split($3, ret, "|"); if(length(ret) > 7) target = 7; print sub
 grep "fighter_search http" /data/nfs/horse3/logs/api-web/stdout_fighter.log* | head -n100 |awk -v target=6 '{split($11, ret, "|"); if(length(ret) > 7) target = 7; print substr(ret[target], 11, 6) , substr(ret[target], 28, 6) , substr(ret[target + 1], index(ret[target + 1], ",") + 1, 2) }' | sort | uniq -c | sort -nr
 
 
-
-
-
-
 grep "fighter_search http" stdout_fighter.log.20151108 |awk -v target=6 '{split($11, ret, "|"); if(length(ret) > 7) target = 7; print substr(ret[target], 11, 6) , substr(ret[target], 28, 6) , substr(ret[target + 1], index(ret[target + 1], ",") + 1, 2) }' | sort | uniq -c | sort -nr
-
-
 
 
 #####################################################################################################################################################################
