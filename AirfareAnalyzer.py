@@ -61,7 +61,7 @@ query_date_list = ["20151106", "20151107", "20151108", "20151109", "20151110", "
 # query_date_list = ["20151105", "20151106", "20151107", "20151108", "20151109", "20151110", "20151111", "20151112", "20151113", "20151114", "20151115", "20151116"]
 
 # query_date_list = ["20151118"]
-# query_date_list = ["20151120", "20151121", "20151122", "20151123", "20151124", "20151125", "20151126"]
+query_date_list = ["20151120", "20151121", "20151122", "20151123", "20151124", "20151125", "20151126"]
 qdl_index = 0
 total_available_flights = 0
 # query_date = "2015-10-30"
@@ -150,7 +150,10 @@ for query_date in query_date_list:
                 # dep_date_list.append(fare["dep_date"] + "/" + fare["ret_date"] + ":" + str(fare["total_adt"]) + ":" + seqId + "-" + uuid)
                 # print fare
 
-                flight_no_and_date = fare["flight_no"] + "@" + fare["dep_date"] + "/" + fare["ret_date"]
+                # flight_no_and_date = fare["flight_no"] + "@" + fare["dep_date"] + "/" + fare["ret_date"]
+                flight_no_and_date = uuid + "#" + fare["flight_no"] + "@" + fare["dep_date"] + "/" + fare["ret_date"]
+                flight_no_and_date = fare["flight_no"] + "@" + fare["dep_date"] + "/" + fare["ret_date"] + "#" + uuid
+
                 price_list = flight_no_query_date_chart.get(flight_no_and_date)
                 if not price_list:
                     price_list = [0] * len(query_date_list)
@@ -188,13 +191,13 @@ fnd_list = flight_no_query_date_chart.keys()
 fnd_list.sort()
 
 chart_file = open(path + "chart_file_" + str(time.time()), "w")
-print >> chart_file, "%-60s" % " ",
+print >> chart_file, "%-90s" % " ",
 for d in query_date_list:
     print >> chart_file, "%-10s" % d,
 print >> chart_file, "\n"
 
 for fnd in fnd_list:
-    print >> chart_file, "%-60s" % fnd,
+    print >> chart_file, "%-90s" % fnd,
     for price in flight_no_query_date_chart.get(fnd):
         print >> chart_file, "%-10s" % price,
     print >> chart_file
